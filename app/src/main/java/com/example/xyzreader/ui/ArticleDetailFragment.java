@@ -7,7 +7,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -19,11 +18,8 @@ import java.util.GregorianCalendar;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ShareCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
@@ -32,11 +28,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.squareup.picasso.Callback;
@@ -65,7 +58,6 @@ public class ArticleDetailFragment extends Fragment implements
     private ImageView mPhotoView;
     private int mScrollY;
     private boolean mIsCard = false;
-    private int mStatusBarFullOpacityBottom;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss");
     // Use default locale format
@@ -97,13 +89,7 @@ public class ArticleDetailFragment extends Fragment implements
         }
 
         mIsCard = getResources().getBoolean(R.bool.detail_is_card);
-        mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(
-                R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
-    }
-
-    public ArticleDetailActivity getActivityCast() {
-        return (ArticleDetailActivity) getActivity();
     }
 
     @Override
