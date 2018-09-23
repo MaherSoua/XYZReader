@@ -61,6 +61,13 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
 
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh();
+            }
+        });
+
         mRecyclerView = findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
 
@@ -143,8 +150,9 @@ public class ArticleListActivity extends AppCompatActivity implements
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    Intent intent = new Intent(ArticleListActivity.this, ArticleDetailActivity.class);
+                    intent.putExtra("selected-item", vh.getAdapterPosition());
+                    startActivity(intent);
                 }
             });
             return vh;
@@ -172,15 +180,13 @@ public class ArticleListActivity extends AppCompatActivity implements
                         DateUtils.getRelativeTimeSpanString(
                                 publishedDate.getTime(),
                                 System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                                DateUtils.FORMAT_ABBREV_ALL).toString()
-                                + "<br/>" + " by "
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+                                DateUtils.FORMAT_ABBREV_ALL).toString()));
+
             } else {
                 holder.subtitleView.setText(Html.fromHtml(
-                        outputFormat.format(publishedDate)
-                        + "<br/>" + " by "
-                        + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+                        outputFormat.format(publishedDate)));
             }
+            holder.authorTextView.setText("by "+ mCursor.getString(ArticleLoader.Query.AUTHOR));
             Picasso.get().load( mCursor.getString(ArticleLoader.Query.THUMB_URL)).into(holder.thumbnailView);
         }
 
@@ -194,12 +200,14 @@ public class ArticleListActivity extends AppCompatActivity implements
         public ImageView thumbnailView;
         public TextView titleView;
         public TextView subtitleView;
+        public TextView authorTextView;
 
         public ViewHolder(View view) {
             super(view);
             thumbnailView = view.findViewById(R.id.thumbnail);
             titleView = view.findViewById(R.id.article_title);
             subtitleView = view.findViewById(R.id.article_subtitle);
+            authorTextView = view.findViewById(R.id.article_author);
         }
     }
 }

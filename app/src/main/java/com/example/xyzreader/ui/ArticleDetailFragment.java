@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 
 import java.text.ParseException;
@@ -141,21 +142,46 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     private void updateStatusBar() {
-        int color = 0;
-        if (mPhotoView != null && mTopInset != 0 && mScrollY > 0) {
-            float f = progress(mScrollY,
-                    mStatusBarFullOpacityBottom - mTopInset * 3,
-                    mStatusBarFullOpacityBottom - mTopInset);
-            color = Color.argb((int) (255 * f),
-                    (int) (Color.red(mMutedColor) * 0.9),
-                    (int) (Color.green(mMutedColor) * 0.9),
-                    (int) (Color.blue(mMutedColor) * 0.9));
-        }
+        int color = getAverageColor();
+
         mStatusBarColorDrawable.setColor(color);
+
+        ((CollapsingToolbarLayout)mRootView.findViewById(R.id.toolbar_layout))
+                .setContentScrimColor(color);
     }
 
-    static float progress(float v, float min, float max) {
-        return constrain((v - min) / (max - min), 0, 1);
+    private int getAverageColor() {
+        int color = 0;
+        if(mPhotoView.getDrawable() != null) {
+            Bitmap bitmap = ((BitmapDrawable)mPhotoView.getDrawable()).getBitmap();
+
+            int redColors = 0;
+            int greenColors = 0;
+            int blueColors = 0;
+            int pixelCount = 0;
+
+            for (int y = 0; y < bitmap.getHeight(); y++)
+            {
+                for (int x = 0; x < bitmap.getWidth(); x++)
+                {
+                    int c = bitmap.getPixel(x, y);
+                    pixelCount++;
+                    redColors += Color.red(c);
+                    greenColors += Color.green(c);
+                    blueColors += Color.blue(c);
+                }
+            }
+            // calculate average of bitmap r,g,b values
+            int red = (redColors/pixelCount);
+            int green = (greenColors/pixelCount);
+            int blue = (blueColors/pixelCount);
+
+            color = Color.argb(255,
+                    (int) (red * 0.9),
+                    (int) (green * 0.9),
+                    (int) (blue * 0.9));
+        }
+        return color;
     }
 
     static float constrain(float val, float min, float max) {
@@ -188,6 +214,7 @@ public class ArticleDetailFragment extends Fragment implements
         TextView bylineView = mRootView.findViewById(R.id.article_byline);
         bylineView.setMovementMethod(new LinkMovementMethod());
         TextView bodyView = mRootView.findViewById(R.id.article_body);
+        TextView authorTextVeiw = mRootView.findViewById(R.id.article_author_details);
 
 
         bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
@@ -203,10 +230,8 @@ public class ArticleDetailFragment extends Fragment implements
                         DateUtils.getRelativeTimeSpanString(
                                 publishedDate.getTime(),
                                 System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                                DateUtils.FORMAT_ABBREV_ALL).toString()
-                                + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
+                                DateUtils.FORMAT_ABBREV_ALL).toString()));
+                authorTextVeiw.setText(mCursor.getString(ArticleLoader.Query.AUTHOR));
 
             } else {
                 // If date is before 1902, just show the string
@@ -216,14 +241,15 @@ public class ArticleDetailFragment extends Fragment implements
                                 + "</font>"));
 
             }
-            bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("--", "<br /> --")));
-            Picasso.get().load(mCursor.getString(ArticleLoader.Query.PHOTO_URL)).into(mPhotoView, new Callback() {
+
+            bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY)
+                    .replaceAll("\r\n\r\n", "<br>")));
+
+                    Picasso.get().load(mCursor.getString(ArticleLoader.Query.PHOTO_URL)).into(mPhotoView, new Callback() {
                 @Override
                 public void onSuccess() {
-                    ((CollapsingToolbarLayout)mRootView.findViewById(R.id.toolbar_layout))
-                            .setContentScrimColor(mMutedColor);
-
                     updateStatusBar();
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         getActivity().getWindow().setStatusBarColor(mMutedColor);
                     }
