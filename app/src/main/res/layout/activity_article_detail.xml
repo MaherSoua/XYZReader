@@ -20,6 +20,7 @@
             android:layout_marginTop="5dp"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/up"
+            android:elevation="4dp"
             android:src="@drawable/ic_arrow_back" />
     </FrameLayout>
 </FrameLayout>
