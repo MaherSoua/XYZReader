@@ -55,6 +55,7 @@
         <item name="android:textColor">@color/dkgray</item>
         <item name="android:textColorLink">@color/theme_accent</item>
         <item name="android:textSize">@dimen/detail_body_text_size</item>
+        <item name="android:maxWidth">@dimen/detail_card_max_width</item>
     </style>
 
     <style name="article_recylerview">
